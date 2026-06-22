@@ -79,7 +79,6 @@ def process_urls(urls):
         embedding=embeddings,
         persist_directory=VECTOR_STORE_DIR
     )
-    vector_store.persist()
     yield "✅ Data stored successfully!"
 
 
