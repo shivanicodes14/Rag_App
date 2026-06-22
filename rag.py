@@ -18,8 +18,26 @@ vector_store = None
 
 
 def initialize_components():
-    global llm
+    global llm, vector_store
 
+    from langchain_groq import ChatGroq
+    from langchain_huggingface import HuggingFaceEmbeddings
+    from langchain_chroma import Chroma
+
+    llm = ChatGroq(
+        api_key=os.getenv("GROQ_API_KEY"),
+        model="llama3-8b-8192"
+    )
+
+    embeddings = HuggingFaceEmbeddings(
+        model_name="sentence-transformers/all-MiniLM-L6-v2"
+    )
+
+    if os.path.exists("vector_store"):
+        vector_store = Chroma(
+            persist_directory="vector_store",
+            embedding_function=embeddings
+        )
 
 def process_urls(urls):
     global vector_store
@@ -61,12 +79,15 @@ def process_urls(urls):
         embedding=embeddings,
         persist_directory=VECTOR_STORE_DIR
     )
-
+    vector_store.persist()
     yield "✅ Data stored successfully!"
 
 
 def generate_answer(query):
-    global vector_store
+    global vector_store, llm
+
+    # ✅ ALWAYS initialize (no condition)
+    initialize_components()
 
     if not vector_store:
         raise RuntimeError("❌ Process URLs first!")
@@ -76,6 +97,6 @@ def generate_answer(query):
         retriever=vector_store.as_retriever()
     )
 
-    result = chain({"question": query}, return_only_outputs=True)
+    result = chain.invoke({"question": query})
 
-    return result["answer"], result["sources"]
+    return result["answer"], result.get("sources", "")
