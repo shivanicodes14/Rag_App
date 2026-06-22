@@ -24,10 +24,11 @@ def initialize_components():
     from langchain_huggingface import HuggingFaceEmbeddings
     from langchain_chroma import Chroma
 
-    llm = ChatGroq(
-        api_key=os.getenv("GROQ_API_KEY"),
-        model="llama3-8b-8192"
-    )
+    #llm = ChatGroq(
+    #    api_key=os.getenv("GROQ_API_KEY"),
+    #    model="llama3-8b-8192"
+    #)
+    llm=ChatGroq(model="llama-3.3-70b-versatile",temperature=0.9, max_tokens=500, api_key=os.getenv("GROQ_API_KEY"))
 
     embeddings = HuggingFaceEmbeddings(
         model_name="sentence-transformers/all-MiniLM-L6-v2"
